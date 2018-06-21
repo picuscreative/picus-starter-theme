@@ -34,7 +34,7 @@ Install PICUS Starter Theme using Composer from your WordPress themes directory 
 
 ```shell
 # @ example.com/site/web/app/themes/
-$ composer create-project picus/picus-starter-theme your-theme-name 1.0.0
+$ composer create-project picus/picus your-theme-name 1.0.0
 ```
 
 ## Theme setup

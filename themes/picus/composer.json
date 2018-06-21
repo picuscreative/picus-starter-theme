@@ -1,5 +1,5 @@
 {
-  "name": "picus/picus-starter-theme",
+  "name": "picus/picus",
   "type": "wordpress-theme",
   "license": "MIT",
   "description": "The best WordPress starter theme with a modern front-end development workflow. Based on HTML5 Boilerplate, gulp, Bower, and Bootstrap.",
