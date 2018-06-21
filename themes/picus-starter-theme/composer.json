@@ -1,0 +1,23 @@
+{
+  "name": "picus/picus-starter-theme",
+  "type": "wordpress-theme",
+  "license": "MIT",
+  "description": "The best WordPress starter theme with a modern front-end development workflow. Based on HTML5 Boilerplate, gulp, Bower, and Bootstrap.",
+  "homepage": "https://github.com/picuscreative/picus-starter-theme",
+  "authors": [
+    {
+      "name": "PICUS",
+      "email": "hello@picus.pt"
+    }
+  ],
+  "keywords": [
+    "wordpress"
+  ],
+  "support": {
+    "issues": "https://github.com/picuscreative/picus-starter-theme/issues"
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "composer/installers": "~1.0"
+  }
+}

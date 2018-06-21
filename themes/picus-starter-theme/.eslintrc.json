@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": false,
+    "node": true
+  },
+  "extends": ["airbnb-base"],
+  "plugins": ["compat"],
+  "rules": {
+    "compat/compat": "error",
+    "no-var": 0
+  }
+}

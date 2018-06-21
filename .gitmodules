@@ -1,0 +1,3 @@
+[submodule "plugins/wordpress-settings"]
+	path = plugins/wordpress-settings
+	url = https://github.com/picuscreative/wordpress-settings.git
