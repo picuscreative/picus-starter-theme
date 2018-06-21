@@ -105,6 +105,10 @@ class acf_admin_options_page {
 		$this->page = acf_get_options_page( $plugin_page );
 		
 		
+		// get post_id (allow lang modification)
+		$this->page['post_id'] = acf_get_valid_post_id($this->page['post_id']);
+		
+		
 		// verify and remove nonce
 		if( acf_verify_nonce('options') ) {
 		
@@ -319,7 +323,7 @@ class acf_admin_options_page {
 		
 		
 		// render
-		acf_render_fields( $this->page['post_id'], $fields, 'div', $field_group['instruction_placement'] );
+		acf_render_fields( $fields, $this->page['post_id'], 'div', $field_group['instruction_placement'] );
 		
 		
 		

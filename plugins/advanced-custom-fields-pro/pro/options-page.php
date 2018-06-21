@@ -83,10 +83,6 @@ class acf_options_page {
 		));
 		
 		
-		// filter post_id
-		$page['post_id'] = acf_get_valid_post_id( $page['post_id'] );
-		
-		
 		// ACF4 compatibility
 		$migrate = array(
 			'title' 	=> 'page_title',
@@ -97,7 +93,7 @@ class acf_options_page {
 		
 		foreach( $migrate as $old => $new ) {
 			if( !empty($page[$old]) ) {
-				$page[ $new ] = acf_extract_var( $page, $old );
+				$page[ $new ] = $page[ $old ];
 			}
 		}
 		
@@ -303,6 +299,10 @@ function acf_options_page() {
 	return $acf_options_page;
 	
 }
+
+
+// remove Options Page add-on conflict
+unset($GLOBALS['acf_options_page']);
 
 
 // initialize

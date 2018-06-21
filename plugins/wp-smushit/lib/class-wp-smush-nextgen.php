@@ -17,7 +17,12 @@ if ( ! class_exists( 'WpSmushNextGen' ) ) {
 		/**
 		 * @var array Contains the total Stats, for displaying it on bulk page
 		 */
-		var $stats = array();
+		var $stats = array(
+			'savings_bytes'   => 0,
+			'size_before'     => 0,
+			'size_after'      => 0,
+			'savings_percent' => 0
+		);
 
 		var $is_nextgen_active = false;
 
@@ -26,15 +31,24 @@ if ( ! class_exists( 'WpSmushNextGen' ) ) {
 		}
 
 		function init() {
-			global $WpSmush;
+			global $WpSmush, $wpsmush_settings;
 			//Filters the setting variable to add S3 setting title and description
 			add_filter( 'wp_smush_settings', array( $this, 'register' ), 5 );
 
 			//Filters the setting variable to add S3 setting in premium features
 			add_filter( 'wp_smush_pro_settings', array( $this, 'add_setting' ), 5 );
 
-			//return if not a pro user
-			if( !$WpSmush->validate_install() ) {
+			//Check if integration is Enabled or not
+			if ( ! empty( $wpsmush_settings->settings ) ) {
+				$opt_nextgen_val = $wpsmush_settings->settings['nextgen'];
+			} else {
+				//Smush NextGen key
+				$opt_nextgen     = WP_SMUSH_PREFIX . 'nextgen';
+				$opt_nextgen_val = $wpsmush_settings->get_setting( $opt_nextgen, false );
+			}
+
+			//return if not a pro user, or nextgen integration is not enabled
+			if( !$WpSmush->validate_install() || !$opt_nextgen_val ) {
 				return;
 			}
 
@@ -64,6 +78,7 @@ if ( ! class_exists( 'WpSmushNextGen' ) ) {
 		function register( $settings ) {
 			$settings['nextgen'] = array(
 				'label' => esc_html__( 'Enable NextGen Gallery integration', 'wp-smushit' ),
+                'short_label' => esc_html__( 'NextGen Gallery', 'wp-smushit' ),
 				'desc'  => esc_html__( 'Allow smushing images directly through NextGen Gallery settings.', 'wp-smushit' )
 			);
 
@@ -519,6 +534,7 @@ if ( ! class_exists( 'WpSmushNextGen' ) ) {
 					'message' => esc_html__( "Error in processing restore action, Fields empty.", "wp-smushit" )
 				) );
 			}
+
 			//Check Nonce
 			if ( ! wp_verify_nonce( $_POST['_nonce'], "wp-smush-restore-" . $_POST['attachment_id'] ) ) {
 				wp_send_json_error( array(
@@ -588,6 +604,9 @@ if ( ! class_exists( 'WpSmushNextGen' ) ) {
 			}
 			//If any of the image is restored, we count it as success
 			if ( in_array( true, $restored ) ) {
+
+				//Update the global Stats
+				$wpsmushnextgenadmin->update_nextgen_stats( $image_id );
 
 				//Remove the Meta, And send json success
 				$image->meta_data['wp_smush'] = '';

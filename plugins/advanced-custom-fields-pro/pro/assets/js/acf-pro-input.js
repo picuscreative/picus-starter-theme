@@ -26,8 +26,8 @@
 			
 			// vars
 			this.$el = this.$field.find('.acf-repeater:first');
-			this.$input = this.$field.find('input:first');
-			this.$table = this.$field.find('table:first');
+			this.$input = this.$el.children('input');
+			this.$table = this.$el.children('table');
 			this.$tbody = this.$table.children('tbody');
 			this.$clone = this.$tbody.children('tr.acf-clone');
 			
@@ -74,6 +74,10 @@
 		
 		render: function(){
 			
+			// vars
+			var $button = this.$el.find('> .acf-actions .button');
+			
+			
 			// update order numbers
 			this.$tbody.children().each(function(i){
 				
@@ -97,11 +101,11 @@
 			// row limit reached
 			if( this.o.max > 0 && this.count() >= this.o.max ) {
 				
-				this.$el.find('> .acf-actions .button').addClass('disabled');
+				$button.addClass('disabled');
 				
 			} else {
 				
-				this.$el.find('> .acf-actions .button').removeClass('disabled');
+				$button.removeClass('disabled');
 				
 			}
 			
@@ -262,17 +266,10 @@
 				forceHelperSize: true,
 				forcePlaceholderSize: true,
 				scroll: true,
-				start: function(event, ui) {
-					
-					acf.do_action('sortstart', ui.item, ui.placeholder);
-					
-	   			},
 	   			stop: function(event, ui) {
 					
 					// render
 					self.render();
-					
-					acf.do_action('sortstop', ui.item, ui.placeholder);
 					
 	   			},
 	   			update: function(event, ui) {
@@ -446,6 +443,7 @@
 			
 			// vars
 			var self = this;
+			var $button = this.$el.find('> .acf-actions .button');
 			
 			
 			// update order numbers
@@ -471,11 +469,11 @@
 			// row limit reached
 			if( this.o.max > 0 && this.count() >= this.o.max ) {
 				
-				this.$el.find('> .acf-actions .button').addClass('disabled');
+				$button.addClass('disabled');
 				
 			} else {
 				
-				this.$el.find('> .acf-actions .button').removeClass('disabled');
+				$button.removeClass('disabled');
 				
 			}
 			
@@ -781,17 +779,10 @@
 				forceHelperSize: true,
 				forcePlaceholderSize: true,
 				scroll: true,
-				start: function(event, ui) {
-					
-					acf.do_action('sortstart', ui.item, ui.placeholder);
-					
-	   			},
 	   			stop: function(event, ui) {
 					
 					// render
 					self.render();
-					
-					acf.do_action('sortstop', ui.item, ui.placeholder);
 					
 	   			},
 	   			update: function(event, ui) {
@@ -1206,25 +1197,17 @@
 			// sortable
 			this.$attachments.unbind('sortable').sortable({
 				
-				items					: '.acf-gallery-attachment',
-				forceHelperSize			: true,
-				forcePlaceholderSize	: true,
-				scroll					: true,
-				
+				items: '.acf-gallery-attachment',
+				forceHelperSize: true,
+				forcePlaceholderSize: true,
+				scroll: true,
 				start: function (event, ui) {
 					
 					ui.placeholder.html( ui.item.html() );
 					ui.placeholder.removeAttr('style');
-								
-					acf.do_action('sortstart', ui.item, ui.placeholder);
-					
-	   			},
-	   			
-	   			stop: function (event, ui) {
-				
-					acf.do_action('sortstop', ui.item, ui.placeholder);
 					
 	   			}
+	   			
 			});
 			
 			
@@ -1915,11 +1898,11 @@
 		fetch: function( id ){
 			
 			// vars
-			var data = acf.prepare_for_ajax({
+			var ajaxdata = {
 				action		: 'acf/fields/gallery/get_attachment',
 				field_key	: this.$field.data('key'),
 				id			: id
-			});
+			};
 			
 			
 			// abort XHR if this field is already loading AJAX data
@@ -1942,7 +1925,7 @@
 				
 				
 				// append
-				data.attachment = val;
+				ajaxdata.attachment = val;
 				
 			}
 			
@@ -1953,7 +1936,7 @@
 				dataType	: 'html',
 				type		: 'post',
 				cache		: false,
-				data		: data,
+				data		: acf.prepare_for_ajax(ajaxdata),
 				context		: this,
 				success		: this.fetch_success
 			});
@@ -2024,12 +2007,12 @@
 			
 			
 			// vars
-			var data = acf.prepare_for_ajax({
+			var ajaxdata = {
 				action		: 'acf/fields/gallery/get_sort_order',
 				field_key	: this.$field.data('key'),
 				ids			: [],
 				sort		: sort
-			});
+			};
 			
 			
 			// find and add attachment ids
@@ -2044,7 +2027,7 @@
 				
 				
 				// append
-				data.ids.push(id);
+				ajaxdata.ids.push(id);
 				
 			});
 			
@@ -2055,7 +2038,7 @@
 				dataType:	'json',
 				type:		'post',
 				cache:		false,
-				data:		data,
+				data:		acf.prepare_for_ajax(ajaxdata),
 				context:	this,
 				success:	this._sort_success
 			});
@@ -2105,7 +2088,7 @@
 				$edit = this.$side.find('.acf-gallery-edit'),
 				$form = this.$side.find('.acf-gallery-side-data'),
 				id = $edit.data('id'),
-				data = acf.serialize( $form );
+				ajaxdata = acf.serialize( $form );
 			
 			
 			// validate
@@ -2118,13 +2101,13 @@
 			
 			
 			// append AJAX action		
-			data.action = 'acf/fields/gallery/update_attachment';
+			ajaxdata.action = 'acf/fields/gallery/update_attachment';
 			
 			
 			// ajax
 			$.ajax({
 				url			: acf.get('ajaxurl'),
-				data		: acf.prepare_for_ajax(data),
+				data		: acf.prepare_for_ajax(ajaxdata),
 				type		: 'post',
 				dataType	: 'json',
 				complete	: function( json ){

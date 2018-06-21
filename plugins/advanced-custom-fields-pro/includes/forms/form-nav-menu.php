@@ -28,6 +28,7 @@ class acf_form_nav_menu {
 		
 		
 		// filters
+		add_filter('wp_get_nav_menu_items',		array($this, 'wp_get_nav_menu_items'), 10, 3);
 		add_filter('wp_edit_nav_menu_walker',	array($this, 'wp_edit_nav_menu_walker'), 10, 2);
 		
 	}
@@ -85,7 +86,7 @@ class acf_form_nav_menu {
 		// verify and remove nonce
 		if( !acf_verify_nonce('nav_menu') ) return $menu_id;
 		
-	    
+			   
 	    // validate and show errors
 		acf_validate_save_post( true );
 		
@@ -129,6 +130,26 @@ class acf_form_nav_menu {
 	}
 	
 	
+	/**
+	*  wp_get_nav_menu_items
+	*
+	*  WordPress does not provide an easy way to find the current menu being edited.
+	*  This function listens to when a menu's items are loaded and stores the menu.
+	*  Needed on nav-menus.php page for new menu with no items
+	*
+	*  @date	23/2/18
+	*  @since	5.6.9
+	*
+	*  @param	type $var Description. Default.
+	*  @return	type Description.
+	*/
+	
+	function wp_get_nav_menu_items( $items, $menu, $args ) {
+		acf_set_data('nav_menu_id', $menu->term_id);
+		return $items;
+	}
+	
+	
 	/*
 	*  wp_edit_nav_menu_walker
 	*
@@ -144,23 +165,16 @@ class acf_form_nav_menu {
 	
 	function wp_edit_nav_menu_walker( $class, $menu_id = 0 ) {
 		
-		// global
-		global $acf_menu;
-		
-		
-		// set var
-		$acf_menu = $menu_id;
-		
+		// update data (needed for ajax location rules to work)
+		acf_set_data('nav_menu_id', $menu_id);
 		
 		// include walker
 		if( class_exists('Walker_Nav_Menu_Edit') ) {
 			acf_include('includes/walkers/class-acf-walker-nav-menu-edit.php');
 		}
 		
-		
 		// return
 		return 'ACF_Walker_Nav_Menu_Edit';
-		
 	}
 	
 	
@@ -213,28 +227,25 @@ class acf_form_nav_menu {
 	
 	function admin_footer() {
 		
-		// global
-		global $acf_menu;
-		
-		
 		// vars
-		$post_id = acf_get_term_post_id( 'nav_menu', $acf_menu );
+		$nav_menu_id = acf_get_data('nav_menu_id');
+		$post_id = acf_get_term_post_id( 'nav_menu', $nav_menu_id );
 		
 		
 		// get field groups
 		$field_groups = acf_get_field_groups(array(
-			'nav_menu' => $acf_menu
+			'nav_menu' => $nav_menu_id
 		));
 		
-		
 ?>
-<script type="text/html" id="tmpl-acf-menu-settings">
+<div id="tmpl-acf-menu-settings" style="display: none;">
 	<?php
 	
 	// data (always needed to save nav menu items)
 	acf_form_data(array( 
-		'post_id'	=> $post_id, 
-		'nonce'		=> 'nav_menu',
+		'screen'	=> 'nav_menu',
+		'post_id'	=> $post_id,
+		'ajax'		=> 1
 	));
 	
 	
@@ -252,7 +263,7 @@ class acf_form_nav_menu {
 			
 				echo '<div class="acf-fields -left -clear">';
 			
-					acf_render_fields( $post_id, $fields, 'div', $field_group['instruction_placement'] );
+					acf_render_fields( $fields, $post_id, 'div', $field_group['instruction_placement'] );
 			
 				echo '</div>';
 			
@@ -263,12 +274,50 @@ class acf_form_nav_menu {
 	}
 	
 	?>
-</script>
+</div>
 <script type="text/javascript">
 (function($) {
 	
 	// append html
 	$('#post-body-content').append( $('#tmpl-acf-menu-settings').html() );
+	
+	
+	// avoid WP over-writing $_POST data
+	// - https://core.trac.wordpress.org/ticket/41502#ticket
+	$(document).on('submit', '#update-nav-menu', function() {
+
+		// vars
+		var $form = $(this);
+		var $input = $('input[name="nav-menu-data"]');
+		
+		
+		// decode json
+		var json = $form.serializeArray();
+		var json2 = [];
+		
+		
+		// loop
+		$.each( json, function( i, pair ) {
+			
+			// avoid nesting (unlike WP)
+			if( pair.name === 'nav-menu-data' ) return;
+			
+			
+			// bail early if is 'acf[' input
+			if( pair.name.indexOf('acf[') > -1 ) return;
+						
+			
+			// append
+			json2.push( pair );
+			
+		});
+		
+		
+		// update
+		$input.val( JSON.stringify(json2) );
+		
+	});
+		
 		
 })(jQuery);	
 </script>
@@ -278,7 +327,7 @@ class acf_form_nav_menu {
 	
 }
 
-new acf_form_nav_menu();
+acf_new_instance('acf_form_nav_menu');
 
 endif;
 

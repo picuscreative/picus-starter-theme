@@ -10,7 +10,9 @@
  * These are commonly used functions that can be pulled from anywhere.
  * (or in some cases they're functions waiting for a home)
  */
+// @codingStandardsIgnoreStart
 class aiosp_common {
+// @codingStandardsIgnoreEnd
 
 	/**
 	 * aiosp_common constructor.
@@ -70,10 +72,10 @@ class aiosp_common {
 
 		$affiliate_id = '';
 
-		//call during plugins_loaded
+		// call during plugins_loaded
 		$affiliate_id = apply_filters( 'aiosp_aff_id', $affiliate_id );
 
-		//build URL
+		// build URL
 		$url = 'https://semperplugins.com/all-in-one-seo-pack-pro-version/';
 		if ( $location ) {
 			$url .= '?loc=' . $location;
@@ -82,7 +84,7 @@ class aiosp_common {
 			$url .= "?ap_id=$affiliate_id";
 		}
 
-		//build hyperlink
+		// build hyperlink
 		$hyperlink = '<a ';
 		if ( $target ) {
 			$hyperlink .= "target=\"$target\" ";
@@ -103,6 +105,28 @@ class aiosp_common {
 	 * Gets the upgrade to Pro version URL.
 	 */
 	static function get_upgrade_url() {
-		//put build URL stuff in here
+		// put build URL stuff in here
 	}
+
+	/**
+	 * Check whether a url is relative and if it is, make it absolute.
+	 *
+	 * @param string $url URL to check.
+	 *
+	 * @return string
+	 */
+	static function absolutize_url( $url ) {
+		if ( 0 !== strpos( $url, 'http' ) && '/' !== $url ) {
+			if ( 0 === strpos( $url, '//' ) ) {
+				// for //<host>/resource type urls.
+				$scheme = parse_url( home_url(), PHP_URL_SCHEME );
+				$url    = $scheme . ':' . $url;
+			} else {
+				// for /resource type urls.
+				$url = home_url( $url );
+			}
+		}
+		return $url;
+	}
+
 }

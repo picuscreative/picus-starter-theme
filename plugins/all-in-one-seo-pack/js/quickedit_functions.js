@@ -5,9 +5,9 @@ jQuery(document).on( 'click', '.visibility-notice', function() {
         data: {
             action: 'aioseo_dismiss_visibility_notice'
         }
-    })
+    });
 
-})
+});
 
 jQuery(document).on( 'click', '.yst_notice', function() {
 
@@ -16,9 +16,9 @@ jQuery(document).on( 'click', '.yst_notice', function() {
         data: {
             action: 'aioseo_dismiss_yst_notice'
         }
-    })
+    });
 
-})
+});
 
 jQuery(document).on( 'click', '.woo-upgrade-notice', function() {
 
@@ -27,9 +27,20 @@ jQuery(document).on( 'click', '.woo-upgrade-notice', function() {
         data: {
             action: 'aioseo_dismiss_woo_upgrade_notice'
         }
-    })
+    });
 
-})
+});
+
+jQuery(document).on( 'click', '.sitemap_max_urls_notice', function() {
+
+    jQuery.ajax({
+        url: ajaxurl,
+        data: {
+            action: 'aioseo_dismiss_sitemap_max_url_notice'
+        }
+    });
+
+});
 
 
 function aioseop_ajax_edit_meta_form( post_id, meta, nonce ) {
@@ -63,7 +74,7 @@ function handle_post_meta( p, t, m, n ) {
 		loading += '</label><div style="float:left">Please wait…</div>';
 		jQuery("div#aioseop_"+m+"_"+p).fadeIn('fast', function() {
 			var aioseop_sack = new sack(aioseopadmin.requestUrl);
-			aioseop_sack.execute = 1; 
+			aioseop_sack.execute = 1;
 			aioseop_sack.method = 'POST';
 			aioseop_sack.setVar( "action", "aioseop_ajax_save_meta");
 			aioseop_sack.setVar( "post_id", p );
@@ -73,9 +84,9 @@ function handle_post_meta( p, t, m, n ) {
 			aioseop_sack.setVar( "_nonce", n );
 			aioseop_sack.onError = function() {alert('Ajax error on saving title'); };
 			aioseop_sack.runAJAX();
-		})
+		});
 		jQuery("div#aioseop_"+m+"_"+p).html(loading);
 		jQuery("div#aioseop_"+m+"_"+p).attr( "class", "aioseop_mpc_admin_meta_options" );
-		
-	})
+
+	});
 }

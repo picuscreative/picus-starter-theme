@@ -13,7 +13,7 @@ class AAL_Admin_Ui {
 	public function create_admin_menu() {
 		$menu_capability = current_user_can( 'view_all_aryo_activity_log' ) ? 'view_all_aryo_activity_log' : 'edit_pages';
 		
-		$this->_screens['main'] = add_menu_page( __( 'Activity Log', 'aryo-activity-log' ), __( 'Activity Log', 'aryo-activity-log' ), $menu_capability, 'activity_log_page', array( &$this, 'activity_log_page_func' ), '', '2.1' );
+		$this->_screens['main'] = add_menu_page( _x( 'Activity Log', 'Page and Menu Title', 'aryo-activity-log' ), _x( 'Activity Log', 'Page and Menu Title', 'aryo-activity-log' ), $menu_capability, 'activity_log_page', array( &$this, 'activity_log_page_func' ), '', '2.1' );
 		
 		// Just make sure we are create instance.
 		add_action( 'load-' . $this->_screens['main'], array( &$this, 'get_list_table' ) );
@@ -23,7 +23,7 @@ class AAL_Admin_Ui {
 		$this->get_list_table()->prepare_items();
 		?>
 		<div class="wrap">
-			<h1 class="aal-page-title"><?php _e( 'Activity Log', 'aryo-activity-log' ); ?></h1>
+			<h1 class="aal-page-title"><?php _ex( 'Activity Log', 'Page and Menu Title', 'aryo-activity-log' ); ?></h1>
 
 			<form id="activity-filter" method="get">
 				<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />
@@ -33,6 +33,9 @@ class AAL_Admin_Ui {
 		
 		<?php // TODO: move to a separate file. ?>
 		<style>
+			#record-actions-submit {
+				margin-top: 10px;
+			}
 			.aal-pt {
 				color: #ffffff;
 				padding: 1px 4px;
@@ -232,8 +235,10 @@ class AAL_Admin_Ui {
 	 * @return AAL_Activity_Log_List_Table
 	 */
 	public function get_list_table() {
-		if ( is_null( $this->_list_table ) )
+		if ( is_null( $this->_list_table ) ) {
 			$this->_list_table = new AAL_Activity_Log_List_Table( array( 'screen' => $this->_screens['main'] ) );
+			do_action( 'aal_admin_page_load', $this->_list_table );
+		}
 		
 		return $this->_list_table;
 	}

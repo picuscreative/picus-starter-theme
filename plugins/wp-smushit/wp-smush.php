@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: WP Smush
+Plugin Name: Smush
 Plugin URI: http://wordpress.org/extend/plugins/wp-smushit/
 Description: Reduce image file sizes, improve performance and boost your SEO using the free <a href="https://premium.wpmudev.org/">WPMU DEV</a> WordPress Smush API.
 Author: WPMU DEV
-Version: 2.7.4.1
-Author URI: http://premium.wpmudev.org/
+Version: 2.7.9.1
+Author URI: https://premium.wpmudev.org/
 Text Domain: wp-smushit
 */
 
@@ -15,7 +15,7 @@ http://dialect.ca/
 */
 
 /*
-Copyright 2007-2016 Incsub (http://incsub.com)
+Copyright 2007-2018 Incsub (http://incsub.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * Constants
  */
 $prefix  = 'WP_SMUSH_';
-$version = '2.7.4.1';
+$version = '2.7.9.1';
 
 //Deactivate the .org version, if pro version is active
 add_action( 'admin_init', 'deactivate_smush_org' );
@@ -53,14 +53,14 @@ if ( ! function_exists( 'deactivate_smush_org' ) ) {
 /**
  * Set the default timeout for API request and AJAX timeout
  */
-$timeout = apply_filters( 'WP_SMUSH_API_TIMEOUT', 90 );
+$timeout = apply_filters( 'WP_SMUSH_API_TIMEOUT', 150 );
 
 // To support smushing on staging sites like SiteGround staging where
 // staging site urls are different but redirects to main site url.
 // Remove the protocols and www, and get the domain name.
 $site_url = str_replace( array( 'http://', 'https://', 'www.' ), '', site_url() );
 // If current site's url is different from site_url, disable Async.
-if ( ! empty( $_SERVER['SERVER_NAME'] ) && ( 0 !== strpos( $_SERVER['SERVER_NAME'], $site_url ) ) && ! defined( $prefix . 'ASYNC' ) ) {
+if ( ! empty( $_SERVER['SERVER_NAME'] ) && ( 0 !== strpos( $site_url, $_SERVER['SERVER_NAME'] ) ) && ! defined( $prefix . 'ASYNC' ) ) {
 	define( $prefix . 'ASYNC', false );
 }
 
@@ -101,8 +101,8 @@ if ( ! function_exists( 'wp_smush_rating_message' ) ) {
 		if ( empty( $wpsmushit_admin->stats ) ) {
 			$wpsmushit_admin->setup_global_stats();
 		}
-		$savings     = $wpsmushit_admin->stats;
-		$show_stats  = false;
+		$savings    = $wpsmushit_admin->stats;
+		$show_stats = false;
 
 		//If there is any saving, greater than 1Mb, show stats
 		if ( ! empty( $savings ) && ! empty( $savings['bytes'] ) && $savings['bytes'] > 1048576 ) {
@@ -130,7 +130,7 @@ if ( ! function_exists( 'wp_smush_rating_message' ) ) {
  */
 if ( ! function_exists( 'wp_smush_email_message' ) ) {
 	function wp_smush_email_message( $message ) {
-		$message = "You're awesome for installing %s! Site speed isn't all image optimization though, so we've collected all the best speed resources we know in a single email - just for users of WP Smush!";
+		$message = "You're awesome for installing %s! Site speed isn't all image optimization though, so we've collected all the best speed resources we know in a single email - just for users of Smush!";
 
 		return $message;
 	}
@@ -182,7 +182,7 @@ if ( is_admin() ) {
 			'wdev-email-message-' . plugin_basename( __FILE__ ),
 			'wp_smush_email_message'
 		);
-	} elseif ( strpos( $dir_path, 'wp-smush-pro' ) !== false ) {
+	} elseif ( strpos( $dir_path, 'wp-smush-pro' ) !== false && file_exists( WP_SMUSH_DIR . 'extras/dash-notice/wpmudev-dash-notification.php' ) ) {
 
 		//Only for WPMU DEV Members
 		require_once( WP_SMUSH_DIR . 'extras/dash-notice/wpmudev-dash-notification.php' );
@@ -194,7 +194,8 @@ if ( is_admin() ) {
 			'name'    => 'WP Smush Pro',
 			'screens' => array(
 				'upload',
-				'media_page_wp-smush-bulk'
+				'toplevel_page_smush',
+				'toplevel_page_smush-network'
 			)
 		);
 	}
@@ -206,20 +207,25 @@ add_action( 'admin_notices', 'smush_deactivated' );
 //Display a admin Notice about plugin deactivation
 if ( ! function_exists( 'smush_deactivated' ) ) {
 	function smush_deactivated() {
-		if ( get_site_option( 'smush_deactivated' ) && is_super_admin() ) { ?>
-			<div class="updated">
-				<p><?php esc_html_e( 'WP Smush Free was deactivated. You have WP Smush Pro active!', 'wp-smushit' ); ?></p>
-			</div> <?php
+		//Display only in backend for administrators
+		if ( is_admin() && is_super_admin() && get_site_option( 'smush_deactivated' ) ) { ?>
+            <div class="updated">
+                <p><?php esc_html_e( 'Smush Free was deactivated. You have Smush Pro active!', 'wp-smushit' ); ?></p>
+            </div> <?php
 			delete_site_option( 'smush_deactivated' );
 		}
 	}
 }
 
 if ( ! function_exists( 'smush_activated' ) ) {
-//Check if a existing install or new
+	/**
+	 * Check if a existing install or new
+	 */
 	function smush_activated() {
+		global $wpsmush_settings;
 
-		$version = get_site_option( WP_SMUSH_PREFIX . 'version' );
+		$version  = get_site_option( WP_SMUSH_PREFIX . 'version' );
+		$settings = ! empty( $wpsmush_settings->settings ) ? $wpsmush_settings->settings : $wpsmush_settings->init_settings();
 
 		//If the version is not saved or if the version is not same as the current version,
 		if ( ! $version || WP_SMUSH_VERSION != $version ) {
@@ -232,7 +238,7 @@ if ( ! function_exists( 'smush_activated' ) ) {
 				update_site_option( 'wp-smush-install-type', 'existing' );
 			} else {
 				//Check for existing settings
-				if ( false !== get_site_option( WP_SMUSH_PREFIX . 'auto' ) || false !== get_option( WP_SMUSH_PREFIX . 'auto' ) ) {
+				if ( false !== $settings['auto'] ) {
 					update_site_option( 'wp-smush-install-type', 'existing' );
 				}
 			}
@@ -285,10 +291,31 @@ if ( ! function_exists( 'smush_sanitize_hex_color_no_hash' ) ) {
 }
 //Load Translation files
 add_action( 'plugins_loaded', 'smush_i18n' );
-if( !function_exists('smush_i18n')) {
+if ( ! function_exists( 'smush_i18n' ) ) {
 	function smush_i18n() {
 		$path = path_join( dirname( plugin_basename( __FILE__ ) ), 'languages/' );
 		load_plugin_textdomain( 'wp-smushit', false, $path );
+	}
+}
+
+//Add Share UI Class
+add_filter( 'admin_body_class', 'smush_body_classes' );
+
+if ( ! function_exists( 'smush_body_classes' ) ) {
+	function smush_body_classes( $classes ) {
+		//Exit if function doesn't exists
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return $classes;
+		}
+		$current_screen = get_current_screen();
+		//If not on plugin page
+		if ( 'toplevel_page_smush' != $current_screen->id && 'toplevel_page_smush-network' != $current_screen->id ) {
+			return $classes;
+		}
+		$classes .= 'sui-2-1-0';
+
+		return $classes;
+
 	}
 }
 

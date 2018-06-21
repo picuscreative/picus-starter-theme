@@ -78,6 +78,134 @@ if ( ! class_exists( 'WpSmushHelper' ) ) {
 
 			return $savings;
 		}
+
+		/**
+		 * Multiple Needles in an array
+		 *
+		 * @param $haystack
+		 * @param $needle
+		 * @param int $offset
+		 *
+		 * @return bool
+		 */
+		function strposa( $haystack, $needle, $offset = 0 ) {
+			if ( ! is_array( $needle ) ) {
+				$needle = array( $needle );
+			}
+			foreach ( $needle as $query ) {
+				if ( strpos( $haystack, $query, $offset ) !== false ) {
+					return true;
+				} // stop on first true result
+			}
+
+			return false;
+		}
+
+
+		/**
+		 * Checks if file for given attachment id exists on s3, otherwise looks for local path
+		 *
+		 * @param $id
+		 * @param $file_path
+		 *
+		 * @return bool
+		 */
+		function file_exists( $id, $file_path ) {
+
+			//If not attachment id is given return false
+			if ( empty( $id ) ) {
+				return false;
+			}
+
+			//Get file path, if not provided
+			if ( empty( $file_path ) ) {
+				$file_path = $this->get_attached_file( $id );
+			}
+
+			global $wpsmush_s3;
+
+			//If S3 is enabled
+			if ( is_object( $wpsmush_s3 ) && method_exists( $wpsmush_s3, 'is_image_on_s3' ) && $wpsmush_s3->is_image_on_s3( $id ) ) {
+				$file_exists = true;
+			} else {
+				$file_exists = file_exists( $file_path );
+			}
+
+			return $file_exists;
+		}
+
+		/**
+		 * Add ellipsis in middle of long strings
+		 *
+		 * @param string $string
+		 *
+		 * @return string Truncated string
+		 */
+		function add_ellipsis( $string = '' ) {
+			if( empty( $string ) ){
+				return $string;
+			}
+			//Return if the character length is 120 or less, else add ellipsis in between
+			if( strlen( $string ) < 121 ) {
+				return $string;
+			}
+			$start = substr( $string, 0, 60 );
+			$end = substr( $string, -40 );
+			$string = $start . '...' . $end;
+
+			return $string;
+		}
+
+		/**
+		 * Bump up the PHP memory limit temporarily
+		 */
+		function increase_memory_limit() {
+			$mlimit = ini_get('memory_limit');
+			$trim_limit = rtrim($mlimit,"M");
+			if ($trim_limit < '256') {
+				@ini_set('memory_limit', '256M');
+			}
+		}
+
+		/**
+		 * Returns true if a database table column exists. Otherwise returns false.
+		 *
+		 * @link http://stackoverflow.com/a/5943905/2489248
+		 * @global wpdb $wpdb
+		 *
+		 * @param string $table_name Name of table we will check for column existence.
+		 * @param string $column_name Name of column we are checking for.
+		 *
+		 * @return boolean True if column exists. Else returns false.
+		 */
+		function table_column_exists( $table_name, $column_name ) {
+			global $wpdb;
+			$column = $wpdb->get_results( $wpdb->prepare(
+				"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s ",
+				DB_NAME, $table_name, $column_name
+			) );
+			if ( ! empty( $column ) ) {
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Drops a specified index from a table.
+		 *
+		 * @since 1.0.1
+		 *
+		 * @global wpdb  $wpdb
+		 *
+		 * @param string $table Database table name.
+		 * @param string $index Index name to drop.
+		 * @return true True, when finished.
+		 */
+		function drop_index($table, $index) {
+			global $wpdb;
+			$wpdb->query("ALTER TABLE `$table` DROP INDEX `$index`");
+			return true;
+		}
 	}
 
 	global $wpsmush_helper;
