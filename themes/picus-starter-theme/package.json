@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "bower install && gulp",
-    "lint": "eslint --fix \"assets/scripts/**/*.js\" && stylelint --fix \"assets/styles/**/*.scss\"",
+    "lint": "eslint --fix ./assets/scripts/**/*.js && stylelint --fix ./assets/styles/**/*.scss",
     "precommit": "lint-staged",
     "commitmsg": "commitlint -e $GIT_PARAMS"
   },
@@ -28,11 +28,11 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix",
+      "eslint --fix ./assets/scripts/**/*.js",
       "git add"
     ],
     "*.css": [
-      "stylelint --fix",
+      "stylelint --fix ./assets/styles/**/*.scss",
       "git add"
     ]
   },
@@ -42,12 +42,14 @@
     ]
   },
   "devDependencies": {
+    "@commitlint/cli": "^6.1.0",
+    "@commitlint/config-conventional": "^6.1.0",
     "asset-builder": "^1.1.0",
     "browser-sync": "^2.8.2",
     "del": "^2.2.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-compat": "^2.2.0",
+    "eslint-plugin-compat": "^2.4.0",
     "eslint-plugin-import": "^2.12.0",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.1.1",

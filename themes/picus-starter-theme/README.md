@@ -1,3 +1,5 @@
+[<img width="110" src="https://avatars3.githubusercontent.com/u/38539999?s=200&v=4g" />](https://picuscreative.com)
+
 # picus-starter-theme
 
 PICUS Starter Theme is a WordPress starter theme based on HTML5 Boilerplate, gulp, Bower, and Bootstrap Sass, that will help you make better themes.
@@ -84,3 +86,7 @@ If your local development URL looks like `http://localhost:8888/project-name/` y
   }
 ...
 ```
+
+## LICENSE
+
+[MIT License](https://opensource.org/licenses/MIT) - [PICUS](https://picuscreative.com)
