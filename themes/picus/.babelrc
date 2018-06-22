@@ -1,0 +1,17 @@
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        "browsers": [
+          "> 3%",
+          "Chrome >= 63",
+          "Firefox >= 57",
+          "Edge >= 14",
+          "Explorer >= 11",
+          "Safari >= 10.1",
+          "iOS >= 10.3"
+        ]
+      }
+    }]
+  ]
+}

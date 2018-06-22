@@ -17,6 +17,7 @@ const runSequence = require('run-sequence');
 const sass = require('gulp-sass');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
+const babel = require('gulp-babel');
 
 // See https://github.com/austinpray/asset-builder
 const manifest = require('asset-builder')('./assets/manifest.json');
@@ -211,6 +212,7 @@ gulp.task('scripts', () => {
   manifest.forEachDependency('js', (dep) => {
     merged.add(gulp
       .src(dep.globs, { base: 'scripts' })
+      .pipe(babel({ presets: ['env'] }))
       .pipe(plumber({ errorHandler: onError }))
       .pipe(jsTasks(dep.name)));
   });

@@ -6,12 +6,12 @@
       {
         "browsers": [
           "> 3%",
-          "Chrome >= 58",
-          "Firefox >= 58",
-          "Edge >= 16",
-          "Explorer >= 10",
-          "Safari >= 11",
-          "iOS >= 9.0"
+          "Chrome >= 63",
+          "Firefox >= 57",
+          "Edge >= 14",
+          "Explorer >= 11",
+          "Safari >= 10.1",
+          "iOS >= 10.3"
         ],
         "severity": "warning"
       }
